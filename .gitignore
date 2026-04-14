@@ -10,6 +10,7 @@ sam/
 cram/
 vcf/
 bcf/
+results/
 
 *.fastq
 *.fastq.gz
