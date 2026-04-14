@@ -1,0 +1,99 @@
+# =========================
+# 1. Raw / large data
+# =========================
+data/
+raw_data/
+fastq/
+fq/
+bam/
+sam/
+cram/
+vcf/
+bcf/
+
+*.fastq
+*.fastq.gz
+*.fq
+*.fq.gz
+*.fasta
+*.fasta.gz
+*.fa
+*.fa.gz
+*.fna
+*.fna.gz
+*.bam
+*.sam
+*.cram
+*.vcf
+*.vcf.gz
+*.bcf
+
+# =========================
+# 2. Intermediate files
+# =========================
+tmp/
+temp/
+scratch/
+work/
+intermediate/
+cache/
+
+*.tmp
+*.temp
+
+# =========================
+# 3. HPC / job files
+# =========================
+slurm-*
+*.out
+*.err
+*.log
+
+# =========================
+# 4. Python
+# =========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+
+# =========================
+# 5. R
+# =========================
+.Rhistory
+.RData
+.Rproj.user/
+
+# =========================
+# 6. Jupyter
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# 7. System / editor
+# =========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# =========================
+# 8. Keep important outputs
+# =========================
+!results/
+!results/**
+!scripts/
+!scripts/**
+!envs/
+!envs/**
+!README.md
+!*.md
+!*.sh
+!*.py
+!*.R
+!Snakefile
+!config.yaml
+!config.yml
