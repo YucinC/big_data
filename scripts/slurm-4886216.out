@@ -1,0 +1,98 @@
+USER = yuch3531
+QOS = normal
+#!/bin/bash
+#SBATCH -A uppmax2026-1-94
+#SBATCH -J phi_bt2
+#SBATCH -t 00:15:00
+#SBATCH -c 1
+
+echo USER = $USER
+echo QOS = $SLURM_JOB_QOS
+cat $0
+
+module load Bowtie2
+
+INPUT_DIR=/proj/uppmax2026-1-94/ngs/phi
+REF=/sw/data/igenomes/PhiX/Illumina/RTA/Sequence/Bowtie2Index/genome
+OUT_DIR=/home/yuch3531/big_data/results
+
+mkdir -p $OUT_DIR
+
+for fq in ${INPUT_DIR}/phi_*.fq
+do
+    base=$(basename ${fq} .fq)
+    echo "=====================#!/bin/bash
+#SBATCH -A uppmax2026-1-94
+#SBATCH -J phi_assignment1
+#SBATCH -t 00:30:00
+#SBATCH -c 1
+
+echo USER = $USER
+echo QOS = $SLURM_JOB_QOS
+cat $0
+
+module load Bowtie2
+module load bioinfo-tools
+module load samtools
+module load bcftools
+
+INPUT_DIR=/proj/uppmax2026-1-94/ngs/phi
+BT2_REF=/sw/data/igenomes/PhiX/Illumina/RTA/Sequence/Bowtie2Index/genome
+FASTA_DIR=/sw/data/igenomes/PhiX/Illumina/RTA/Sequence/WholeGenomeFasta
+REF_FA=${FASTA_DIR}/genome.fa
+OUT_DIR=/home/yuch3531/big_data/results
+
+mkdir -p ${OUT_DIR}
+
+echo "Checking input and reference files..."
+ls ${INPUT_DIR}
+ls ${FASTA_DIR}
+
+if [ ! -f "${REF_FA}" ]; then
+    echo "ERROR: Reference fasta file not found: ${REF_FA}"
+    exit 1
+fi
+
+
+for fq in ${INPUT_DIR}/phi_*.fq
+do
+    base=$(basename ${fq} .fq)
+
+    echo "======================================"
+    echo "Processing sample: ${base}"
+    echo "Input fastq: ${fq}"
+
+    bowtie2 \
+        -x ${BT2_REF} \
+        -U ${fq} \
+        -S ${OUT_DIR}/${base}.sam
+
+    samtools sort \
+        ${OUT_DIR}/${base}.sam \
+        -o ${OUT_DIR}/${base}.bam
+
+    samtools index \
+        ${OUT_DIR}/${base}.bam
+
+    bcftools mpileup \
+        -Ou \
+        -f ${REF_FA} \
+        ${OUT_DIR}/${base}.bam | \
+    bcftools call \
+        -mv \
+        -Ob \
+        -o ${OUT_DIR}/${base}.bcf
+
+    bcftools view \
+        ${OUT_DIR}/${base}.bcf \
+        -o ${OUT_DIR}/${base}.vcf
+
+    echo "Finished sample: ${base}"
+done
+
+echo "======================================"
+echo "All samples finished."
+echo "Results are in: ${OUT_DIR}"
+
+/var/spool/slurmd/job4886216/slurm_script: line 93: unexpected EOF while looking for matching `"'
+/var/spool/slurmd/job4886216/slurm_script: line 95: syntax error: unexpected end of file

@@ -1,0 +1,375 @@
+USER = yuch3531
+QOS = normal
+#!/bin/bash
+#SBATCH -A uppmax2026-1-94
+#SBATCH -J phi_assignment1
+#SBATCH -t 00:30:00
+#SBATCH -c 1
+
+echo USER = $USER
+echo QOS = $SLURM_JOB_QOS
+cat $0
+
+module load Bowtie2
+module load bioinfo-tools
+module load samtools
+module load bcftools
+
+INPUT_DIR=/proj/uppmax2026-1-94/ngs/phi
+BT2_REF=/sw/data/igenomes/PhiX/Illumina/RTA/Sequence/Bowtie2Index/genome
+FASTA_DIR=/sw/data/igenomes/PhiX/Illumina/RTA/Sequence/WholeGenomeFasta
+REF_FA=${FASTA_DIR}/genome.fa
+OUT_DIR=/home/yuch3531/big_data/results
+
+mkdir -p ${OUT_DIR}
+
+echo "Checking input and reference files..."
+ls ${INPUT_DIR}
+ls ${FASTA_DIR}
+
+if [ ! -f "${REF_FA}" ]; then
+    echo "ERROR: Reference fasta file not found: ${REF_FA}"
+    exit 1
+fi
+
+if [ ! -f "${REF_FA}.fai" ]; then
+    echo "Reference fai index not found. Creating ${REF_FA}.fai ..."
+    samtools faidx ${REF_FA}
+fi
+
+for fq in ${INPUT_DIR}/phi_*.fq
+do
+    base=$(basename "${fq}" .fq)
+
+    echo "======================================"
+    echo "Processing sample: ${base}"
+    echo "Input fastq: ${fq}"
+
+    bowtie2 \
+        -x ${BT2_REF} \
+        -U ${fq} \
+        -S ${OUT_DIR}/${base}.sam
+
+    samtools sort \
+        ${OUT_DIR}/${base}.sam \
+        -o ${OUT_DIR}/${base}.bam
+
+    samtools index \
+        ${OUT_DIR}/${base}.bam
+
+    bcftools mpileup \
+        -Ou \
+        -f ${REF_FA} \
+        ${OUT_DIR}/${base}.bam | \
+    bcftools call \
+        -mv \
+        -Ob \
+        -o ${OUT_DIR}/${base}.bcf
+
+    bcftools view \
+        ${OUT_DIR}/${base}.bcf \
+        -o ${OUT_DIR}/${base}.vcf
+
+    echo "Finished sample: ${base}"
+done
+
+echo "======================================"
+echo "All samples finished."
+echo "Results are in: ${OUT_DIR}"
+Lmod has detected the following error:
+
+*** PLEASE READ THIS ENTIRE MESSAGE ***
+
+---------------------------------------------------
+IMPORTANT -=- IMPORTANT -=- IMPORTANT -=- IMPORTANT
+---------------------------------------------------
+
+You are seeing this message because you tried to load the 'bioinfo-tools'
+module in Pelle.
+
+The 'bioinfo-tools' module is not available on Pelle. It is not necessary
+to load it to access bioinformatics software. On Pelle, bioinformatics
+modules can be loaded directly. This is different from Rackham.
+
+Many modules and module versions are already available on Pelle, but their
+names may be capitalised differently and their versions are in a different
+format. Use 'module avail modulename' or 'module spider modulename' to find
+the new naming and available versions for your module.
+
+For example, 'module avail samtools' shows (with a slightly different format):
+
+----------------------- /sw/arch/eb/modules/all ------------------------
+	SAMtools/0.1.20-GCC-13.3.0	SAMtools/1.19.2-GCC-13.3.0
+	SAMtools/1.3.1-GCC-13.3.0	SAMtools/1.21-GCC-13.3.0
+	SAMtools/1.12-GCC-13.3.0	SAMtools/1.22-GCC-13.3.0 (D)
+	SAMtools/1.13-GCC-13.3.0
+
+This tells you that the new spelling of the module is SAMtools and that there
+are seven available versions. The '(D)' mark indicates that SAMtools/1.22 is
+the default version loaded with 'module load SAMtools'. The default version
+will change as new versions are installed. We recommend always specifying
+module versions in your 'module load' commands.
+
+
+LOADING MODULES
+---------------
+
+You can specify the module version by using just the version.
+
+	module load SAMtools/1.21	(RECOMMENDED)
+
+or using the full version and what is called the toolchain:
+
+	module load SAMtools/1.21-GCC-13.3.0	(NOT RECOMMENDED)
+
+We strongly recommend using the first method for specifying the version.
+Toolchains (compilers, libraries, and associated utilities) are handled
+hierarchically: some tools require a more simple toolchain than others, and it
+is easier to ignore the toolchains. Also, the toolchain used to build a
+particular module version may change as we make updates, but this should not
+make any substantive difference to your use of the module. Toolchain names
+include: GCCcore GCC gfbf gompi foss intel intelmpi
+
+
+LET US KNOW
+-----------
+
+Contact UPPMAX support if
+
+ - A module you need appears to be missing
+ - You do not find your required version of a module
+ - You notice weirdness with the module system
+ - Or you have further questions about bioinformatics software on Pelle
+
+Email us at
+
+	support@uppmax.uu.se
+
+
+*** PLEASE READ THIS ENTIRE MESSAGE ***
+
+
+While processing the following module(s):
+    Module fullname       Module Filename
+    ---------------       ---------------
+    bioinfo-tools/latest  /sw/arch/local/modules/bioinfo-tools/latest.lua
+
+Lmod has detected the following error: The following module(s) are unknown:
+"samtools"
+
+Please check the spelling or version number. Also try "module spider ..."
+It is also possible your cache file is out-of-date; it may help to try:
+  $ module --ignore_cache load "samtools"
+
+Also make sure that all modulefiles written in TCL start with the string
+#%Module
+
+
+
+Lmod has detected the following error: The following module(s) are unknown:
+"bcftools"
+
+Please check the spelling or version number. Also try "module spider ..."
+It is also possible your cache file is out-of-date; it may help to try:
+  $ module --ignore_cache load "bcftools"
+
+Also make sure that all modulefiles written in TCL start with the string
+#%Module
+
+
+
+Checking input and reference files...
+phi_01.fq
+phi_02.fq
+phi_03.fq
+phi_04.fq
+phi_05.fq
+phi_06.fq
+phi_07.fq
+phi_08.fq
+phi_09.fq
+phi_10.fq
+phi_11.fq
+phi_12.fq
+phi_13.fq
+genome.dict
+genome.fa
+genome.fa.amb
+genome.fa.ann
+genome.fa.bwt
+genome.fa.fai
+genome.fa.pac
+genome.fa.sa
+GenomeSize.xml
+======================================
+Processing sample: phi_01
+Input fastq: /proj/uppmax2026-1-94/ngs/phi/phi_01.fq
+535 reads; of these:
+  535 (100.00%) were unpaired; of these:
+    60 (11.21%) aligned 0 times
+    475 (88.79%) aligned exactly 1 time
+    0 (0.00%) aligned >1 times
+88.79% overall alignment rate
+Note: none of --samples-file, --ploidy or --ploidy-file given, assuming all sites are diploid
+[mpileup] 1 samples in 1 input files
+[mpileup] maximum number of reads per input file set to -d 250
+Finished sample: phi_01
+======================================
+Processing sample: phi_02
+Input fastq: /proj/uppmax2026-1-94/ngs/phi/phi_02.fq
+535 reads; of these:
+  535 (100.00%) were unpaired; of these:
+    77 (14.39%) aligned 0 times
+    458 (85.61%) aligned exactly 1 time
+    0 (0.00%) aligned >1 times
+85.61% overall alignment rate
+Note: none of --samples-file, --ploidy or --ploidy-file given, assuming all sites are diploid
+[mpileup] 1 samples in 1 input files
+[mpileup] maximum number of reads per input file set to -d 250
+Finished sample: phi_02
+======================================
+Processing sample: phi_03
+Input fastq: /proj/uppmax2026-1-94/ngs/phi/phi_03.fq
+535 reads; of these:
+  535 (100.00%) were unpaired; of these:
+    66 (12.34%) aligned 0 times
+    469 (87.66%) aligned exactly 1 time
+    0 (0.00%) aligned >1 times
+87.66% overall alignment rate
+Note: none of --samples-file, --ploidy or --ploidy-file given, assuming all sites are diploid
+[mpileup] 1 samples in 1 input files
+[mpileup] maximum number of reads per input file set to -d 250
+Finished sample: phi_03
+======================================
+Processing sample: phi_04
+Input fastq: /proj/uppmax2026-1-94/ngs/phi/phi_04.fq
+535 reads; of these:
+  535 (100.00%) were unpaired; of these:
+    64 (11.96%) aligned 0 times
+    471 (88.04%) aligned exactly 1 time
+    0 (0.00%) aligned >1 times
+88.04% overall alignment rate
+Note: none of --samples-file, --ploidy or --ploidy-file given, assuming all sites are diploid
+[mpileup] 1 samples in 1 input files
+[mpileup] maximum number of reads per input file set to -d 250
+Finished sample: phi_04
+======================================
+Processing sample: phi_05
+Input fastq: /proj/uppmax2026-1-94/ngs/phi/phi_05.fq
+535 reads; of these:
+  535 (100.00%) were unpaired; of these:
+    64 (11.96%) aligned 0 times
+    471 (88.04%) aligned exactly 1 time
+    0 (0.00%) aligned >1 times
+88.04% overall alignment rate
+Note: none of --samples-file, --ploidy or --ploidy-file given, assuming all sites are diploid
+[mpileup] 1 samples in 1 input files
+[mpileup] maximum number of reads per input file set to -d 250
+Finished sample: phi_05
+======================================
+Processing sample: phi_06
+Input fastq: /proj/uppmax2026-1-94/ngs/phi/phi_06.fq
+535 reads; of these:
+  535 (100.00%) were unpaired; of these:
+    84 (15.70%) aligned 0 times
+    451 (84.30%) aligned exactly 1 time
+    0 (0.00%) aligned >1 times
+84.30% overall alignment rate
+Note: none of --samples-file, --ploidy or --ploidy-file given, assuming all sites are diploid
+[mpileup] 1 samples in 1 input files
+[mpileup] maximum number of reads per input file set to -d 250
+Finished sample: phi_06
+======================================
+Processing sample: phi_07
+Input fastq: /proj/uppmax2026-1-94/ngs/phi/phi_07.fq
+535 reads; of these:
+  535 (100.00%) were unpaired; of these:
+    97 (18.13%) aligned 0 times
+    438 (81.87%) aligned exactly 1 time
+    0 (0.00%) aligned >1 times
+81.87% overall alignment rate
+Note: none of --samples-file, --ploidy or --ploidy-file given, assuming all sites are diploid
+[mpileup] 1 samples in 1 input files
+[mpileup] maximum number of reads per input file set to -d 250
+Finished sample: phi_07
+======================================
+Processing sample: phi_08
+Input fastq: /proj/uppmax2026-1-94/ngs/phi/phi_08.fq
+535 reads; of these:
+  535 (100.00%) were unpaired; of these:
+    90 (16.82%) aligned 0 times
+    445 (83.18%) aligned exactly 1 time
+    0 (0.00%) aligned >1 times
+83.18% overall alignment rate
+Note: none of --samples-file, --ploidy or --ploidy-file given, assuming all sites are diploid
+[mpileup] 1 samples in 1 input files
+[mpileup] maximum number of reads per input file set to -d 250
+Finished sample: phi_08
+======================================
+Processing sample: phi_09
+Input fastq: /proj/uppmax2026-1-94/ngs/phi/phi_09.fq
+535 reads; of these:
+  535 (100.00%) were unpaired; of these:
+    73 (13.64%) aligned 0 times
+    462 (86.36%) aligned exactly 1 time
+    0 (0.00%) aligned >1 times
+86.36% overall alignment rate
+Note: none of --samples-file, --ploidy or --ploidy-file given, assuming all sites are diploid
+[mpileup] 1 samples in 1 input files
+[mpileup] maximum number of reads per input file set to -d 250
+Finished sample: phi_09
+======================================
+Processing sample: phi_10
+Input fastq: /proj/uppmax2026-1-94/ngs/phi/phi_10.fq
+535 reads; of these:
+  535 (100.00%) were unpaired; of these:
+    69 (12.90%) aligned 0 times
+    466 (87.10%) aligned exactly 1 time
+    0 (0.00%) aligned >1 times
+87.10% overall alignment rate
+Note: none of --samples-file, --ploidy or --ploidy-file given, assuming all sites are diploid
+[mpileup] 1 samples in 1 input files
+[mpileup] maximum number of reads per input file set to -d 250
+Finished sample: phi_10
+======================================
+Processing sample: phi_11
+Input fastq: /proj/uppmax2026-1-94/ngs/phi/phi_11.fq
+535 reads; of these:
+  535 (100.00%) were unpaired; of these:
+    83 (15.51%) aligned 0 times
+    452 (84.49%) aligned exactly 1 time
+    0 (0.00%) aligned >1 times
+84.49% overall alignment rate
+Note: none of --samples-file, --ploidy or --ploidy-file given, assuming all sites are diploid
+[mpileup] 1 samples in 1 input files
+[mpileup] maximum number of reads per input file set to -d 250
+Finished sample: phi_11
+======================================
+Processing sample: phi_12
+Input fastq: /proj/uppmax2026-1-94/ngs/phi/phi_12.fq
+535 reads; of these:
+  535 (100.00%) were unpaired; of these:
+    90 (16.82%) aligned 0 times
+    445 (83.18%) aligned exactly 1 time
+    0 (0.00%) aligned >1 times
+83.18% overall alignment rate
+Note: none of --samples-file, --ploidy or --ploidy-file given, assuming all sites are diploid
+[mpileup] 1 samples in 1 input files
+[mpileup] maximum number of reads per input file set to -d 250
+Finished sample: phi_12
+======================================
+Processing sample: phi_13
+Input fastq: /proj/uppmax2026-1-94/ngs/phi/phi_13.fq
+535 reads; of these:
+  535 (100.00%) were unpaired; of these:
+    48 (8.97%) aligned 0 times
+    487 (91.03%) aligned exactly 1 time
+    0 (0.00%) aligned >1 times
+91.03% overall alignment rate
+Note: none of --samples-file, --ploidy or --ploidy-file given, assuming all sites are diploid
+[mpileup] 1 samples in 1 input files
+[mpileup] maximum number of reads per input file set to -d 250
+Finished sample: phi_13
+======================================
+All samples finished.
+Results are in: /home/yuch3531/big_data/results
